@@ -1,3 +1,6 @@
+"""
+Show one DCM image with matplotlib's showim()
+"""
 from pydicom import dcmread
 from matplotlib import pyplot as plt
 import numpy as np
@@ -8,7 +11,7 @@ import os
 
 def main():
     if len(sys.argv) != 2:
-        print(f"Error: Not enough arguments! Number of args:{len(sys.argv)}")
+        print(f"Error: Not enough arguments! Number of args:{len(sys.argv)}\nUse as `python3 show_dcm.py /path/to/file.dcm")
         exit(1)
     file_path = sys.argv[-1]
     ds = dcmread(file_path)
