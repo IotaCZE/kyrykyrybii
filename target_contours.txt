@@ -1,1 +1,2 @@
-SpinalCord,GTV,PTV_all,CTV_Mid01,Glnd_Submand_R,Glnd_Submand_L,Esophagus,CTV_Mid00,CTV_Low,CTV_High,Parotid_L,Parotid_R,SpinalCord_PRV
+Glnd_Submand,Esophagus,SpinalCord,Parotid
+GTV
