@@ -125,59 +125,61 @@ def filter_series(pairs_ct_rs, target_contour_file):
     return keep
 
 
-folder = "Rackaton_Data/SAMPLE_004"
+if __name__ == "__main__":
 
-series_dict = group_ct_series(folder)
-# print(f"Found {len(series_dict)} CT series.")
-# for uid, files in series_dict.items():
-#     print(f"SeriesInstanceUID: {uid}, #Slices: {len(files)}")
+    folder = "Rackaton_Data/SAMPLE_004"
 
-pairs_ct_rs = []
-for f in os.listdir(folder):
-    if "RS" in f:
-        path = os.path.join(folder, f)
-        series_uid, rs = find_ct_series_uid_for_rs(path)
-        pairs_ct_rs.append((series_uid, rs))
-        # print(f"{f} → SeriesInstanceUID: {series_uid}")
+    series_dict = group_ct_series(folder)
+    # print(f"Found {len(series_dict)} CT series.")
+    # for uid, files in series_dict.items():
+    #     print(f"SeriesInstanceUID: {uid}, #Slices: {len(files)}")
 
-#rs_file =  f'SAMPLE_001/{pairs_ct_rs[0][0]}' #"path/to/your/folder/RS123.dcm"
-    
-# print(len(pairs_ct_rs))
-pairs_ct_rs = filter_series(pairs_ct_rs, 'target_contours.txt')
+    pairs_ct_rs = []
+    for f in os.listdir(folder):
+        if "RS" in f:
+            path = os.path.join(folder, f)
+            series_uid, rs = find_ct_series_uid_for_rs(path)
+            pairs_ct_rs.append((series_uid, rs))
+            # print(f"{f} → SeriesInstanceUID: {series_uid}")
 
-# print(len(pairs_ct_rs))
+    #rs_file =  f'SAMPLE_001/{pairs_ct_rs[0][0]}' #"path/to/your/folder/RS123.dcm"
+        
+    # print(len(pairs_ct_rs))
+    pairs_ct_rs = filter_series(pairs_ct_rs, 'target_contours.txt')
 
-rs = pairs_ct_rs[0][1]
-series_uid = pairs_ct_rs[0][0]
+    # print(len(pairs_ct_rs))
 
-# print(f"RS file: {rs.file_meta.MediaStorageSOPInstanceUID}")
-# print("Available structures:")
-# for roi in rs.StructureSetROISequence:
-#     print(f"→ ROINumber: {roi.ROINumber}, ROIName: {roi.ROIName}")
+    rs = pairs_ct_rs[0][1]
+    series_uid = pairs_ct_rs[0][0]
 
-
-# Load CT
-ct_image, ct_slices, spacing = load_ct_from_series(series_dict[series_uid])
-
-# Choose a structure (e.g., "Bladder" or the name you printed above)
-structure_name = "SpinalCord"
-contours = get_structure_contours(rs, structure_name)
-
-# Display
-display_ct_with_contours(ct_image, ct_slices, contours)
+    # print(f"RS file: {rs.file_meta.MediaStorageSOPInstanceUID}")
+    # print("Available structures:")
+    # for roi in rs.StructureSetROISequence:
+    #     print(f"→ ROINumber: {roi.ROINumber}, ROIName: {roi.ROIName}")
 
 
-'''from collections import Counter
-structure_counter = Counter()
+    # Load CT
+    ct_image, ct_slices, spacing = load_ct_from_series(series_dict[series_uid])
 
-folder = "SAMPLE_001"
-for f in os.listdir(folder):
-    if "RS" in f:
-        rs_path = os.path.join(folder, f)
-        _, rs = find_ct_series_uid_for_rs(rs_path)
-        for roi in rs.StructureSetROISequence:
-            structure_counter[roi.ROIName] += 1
+    # Choose a structure (e.g., "Bladder" or the name you printed above)
+    structure_name = "SpinalCord"
+    contours = get_structure_contours(rs, structure_name)
 
-print("Structure frequency across RS files:")
-for k, v in structure_counter.items():
-    print(f"{k}: {v} RS files")'''
+    # Display
+    display_ct_with_contours(ct_image, ct_slices, contours)
+
+
+    '''from collections import Counter
+    structure_counter = Counter()
+
+    folder = "SAMPLE_001"
+    for f in os.listdir(folder):
+        if "RS" in f:
+            rs_path = os.path.join(folder, f)
+            _, rs = find_ct_series_uid_for_rs(rs_path)
+            for roi in rs.StructureSetROISequence:
+                structure_counter[roi.ROIName] += 1
+
+    print("Structure frequency across RS files:")
+    for k, v in structure_counter.items():
+        print(f"{k}: {v} RS files")'''
