@@ -176,3 +176,5 @@ cython_debug/
 
 # Rackaton_Data folder
 Rackaton_Data
+
+out
