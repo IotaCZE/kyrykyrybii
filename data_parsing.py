@@ -180,22 +180,19 @@ def generate_patient_files(ct_image, ct_slices, contours, structure_name, patien
             np.save(obj_file,bool_grid)
         except Exception as e:
             print(f"Skipping contour at z={z}: {e}")
-    
-    for idx in range(len(ct_slices)):
-        slice_file = slices_path_out/f"slice{idx}.npy"
-        if not slice_file.is_file():
-            np.save(slice_file,ct_image[idx])
             
 
 
-def check_contour_slices(target_contours, ct_image, patient_id):
+def check_contour_slices(target_contours, slice_shape, patient_id):
+    slice_files = os.listdir(f"./out/patient{patient_id}/slices")
+    indxs = [f.replace('slice', '').replace('.npy', '') for f in slice_files]
     for contour in target_contours:
         contour_dir = Path(f"./out/patient{patient_id}/{contour}")
         contour_dir.mkdir(exist_ok=True,parents=True)
-        for idx in range(ct_image.shape[0]):
+        for idx in indxs:
             slice_file = contour_dir/f"{idx}.npy"
             if not slice_file.is_file():
-                np.save(slice_file,np.zeros(shape=ct_image[idx].shape))
+                np.save(slice_file,np.zeros(shape=slice_shape))
 
 
 
@@ -235,7 +232,7 @@ def process_patient(patient_id):
 
         generate_patient_files(ct_image, ct_slices, contours, structure_name, patient_id)
     
-    check_contour_slices(target_contours, ct_image, patient_id)
+    check_contour_slices(target_contours, ct_image[0].shape, patient_id)
 
 
 if __name__ == "__main__":
