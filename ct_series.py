@@ -2,7 +2,7 @@ from collections import defaultdict
 import pydicom
 import os
 import numpy as np
-import SimpleITK as sitk
+# import SimpleITK as sitk
 from matplotlib import pyplot as plt
 
 def group_ct_series(folder):
@@ -84,6 +84,7 @@ def process_all(folder):
 def display_ct_with_contours(ct_image, ct_slices, contours):
     z_positions = [s.ImagePositionPatient[2] for s in ct_slices]
     
+    print(len(contours))
     for contour in contours:
         z = contour[0][2]
         try:
@@ -105,32 +106,50 @@ def display_ct_with_contours(ct_image, ct_slices, contours):
         except Exception as e:
             print(f"Skipping contour at z={z}: {e}")
 
+def filter_series(pairs_ct_rs, contours):
+    keep = []
+    for pair in pairs_ct_rs:
+        rs = pair[1]
+        print(f"RS file: {rs.file_meta.MediaStorageSOPInstanceUID}")
+        for roi in rs.StructureSetROISequence:
+            if roi.ROIName in contours:
+                print(f"Found wanted contour: ROINumber: {roi.ROINumber}, ROIName: {roi.ROIName}")
+                keep.append(pair)
+            else:
+                print(f"No wanted contour found.")
+                # pairs_ct_rs.remove(pair)
+    return keep
 
 
+folder = "Rackaton_Data/SAMPLE_004"
 
-
-
-
-series_dict = group_ct_series("SAMPLE_001")
-'''print(f"Found {len(series_dict)} CT series.")
+series_dict = group_ct_series(folder)
+print(f"Found {len(series_dict)} CT series.")
 for uid, files in series_dict.items():
-    print(f"SeriesInstanceUID: {uid}, #Slices: {len(files)}")'''
+    print(f"SeriesInstanceUID: {uid}, #Slices: {len(files)}")
 
 pairs_ct_rs = []
-for f in os.listdir("SAMPLE_001"):
+for f in os.listdir(folder):
     if "RS" in f:
-        path = os.path.join("SAMPLE_001", f)
+        path = os.path.join(folder, f)
         series_uid, rs = find_ct_series_uid_for_rs(path)
         pairs_ct_rs.append((series_uid, rs))
-        #print(f"{f} → SeriesInstanceUID: {series_uid}")
+        print(f"{f} → SeriesInstanceUID: {series_uid}")
 
 #rs_file =  f'SAMPLE_001/{pairs_ct_rs[0][0]}' #"path/to/your/folder/RS123.dcm"
+
+print(len(pairs_ct_rs))
+pairs_ct_rs = filter_series(pairs_ct_rs, ["SpinalCord", "GTV", "PTV_all", "CTV_Mid01", "Glnd_Submand_R"])
+
+print(len(pairs_ct_rs))
+
 rs = pairs_ct_rs[0][1]
 series_uid = pairs_ct_rs[0][0]
-'''print(f"RS file: {rs.file_meta.MediaStorageSOPInstanceUID}")
+
+print(f"RS file: {rs.file_meta.MediaStorageSOPInstanceUID}")
 print("Available structures:")
 for roi in rs.StructureSetROISequence:
-    print(f"→ ROINumber: {roi.ROINumber}, ROIName: {roi.ROIName}")'''
+    print(f"→ ROINumber: {roi.ROINumber}, ROIName: {roi.ROIName}")
 
 
 # Load CT
