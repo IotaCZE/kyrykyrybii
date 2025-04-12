@@ -1,22 +1,10 @@
 import pydicom
-from pydicom import dcmread
-
 from matplotlib import pyplot as plt
 import numpy as np
-
 import sys
-
 import os
-
 from pathlib import Path
-
 from scipy.ndimage import binary_fill_holes
-
-import pydicom
-import os
-import sys
-import numpy as np
-from matplotlib import pyplot as plt
 
 from ct_series import *
 
@@ -192,10 +180,29 @@ def generate_patient_files(ct_image, ct_slices, contours, structure_name, patien
             np.save(obj_file,bool_grid)
         except Exception as e:
             print(f"Skipping contour at z={z}: {e}")
+    
+    for idx in range(len(ct_slices)):
+        slice_file = slices_path_out/f"slice{idx}.npy"
+        if not slice_file.is_file():
+            np.save(slice_file,ct_image[idx])
+            
+
+
+def check_contour_slices(target_contours, ct_image, patient_id):
+    for contour in target_contours:
+        contour_dir = Path(f"./out/patient{patient_id}/{contour}")
+        contour_dir.mkdir(exist_ok=True,parents=True)
+        for idx in range(ct_image.shape[0]):
+            slice_file = contour_dir/f"{idx}.npy"
+            if not slice_file.is_file():
+                np.save(slice_file,np.zeros(shape=ct_image[idx].shape))
+
+
 
 
 def process_patient(patient_id):
-    folder = f"SAMPLE_00{patient_id}"
+    # folder = f"SAMPLE_00{patient_id}"
+    folder = f"Rackaton_Data/SAMPLE_00{patient_id}"
 
     series_dict = group_ct_series(folder)
 
@@ -227,6 +234,8 @@ def process_patient(patient_id):
         contours = get_structure_contours(rs, structure_name)
 
         generate_patient_files(ct_image, ct_slices, contours, structure_name, patient_id)
+    
+    check_contour_slices(target_contours, ct_image, patient_id)
 
 
 if __name__ == "__main__":
