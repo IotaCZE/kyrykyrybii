@@ -139,19 +139,19 @@ def project_discrete_curve_to_grid(curve_points, grid_shape):
     return grid
 
 
-def generate_patient_files(ct_image, ct_slices, contours, structure_name, patient_id):
+def generate_patient_files(ct_image, ct_slices, contours, structure_name, patient_id, series_num):
     path_out = Path('./out')
     path_out.mkdir(exist_ok=True,parents=True)
 
-    patient_out_path = path_out / f"patient{patient_id}"
+    series_out_path = path_out / f"patient{patient_id}/series{series_num}"
     z_positions = [s.ImagePositionPatient[2] for s in ct_slices]
 
-    slices_path_out = patient_out_path / "slices"
+    slices_path_out = series_out_path / "slices"
     slices_path_out.mkdir(exist_ok=True,parents=True)
     
     for contour in contours:
         z = contour[0][2]
-        roi_path_out = patient_out_path / structure_name
+        roi_path_out = series_out_path / structure_name
         roi_path_out.mkdir(exist_ok=True,parents=True)
         try:
             idx = min(range(len(z_positions)), key=lambda i: abs(z_positions[i] - z))
@@ -174,7 +174,7 @@ def generate_patient_files(ct_image, ct_slices, contours, structure_name, patien
 
 
             bool_grid = project_discrete_curve_to_grid(p_adj,slice_img.shape)
-            bool_grid = binary_fill_holes(bool_grid)
+            bool_grid = binary_fill_holes(bool_grid).astype(np.bool)
 
             obj_file = roi_path_out / f"{idx}.npy"
             np.save(obj_file,bool_grid)
@@ -183,18 +183,34 @@ def generate_patient_files(ct_image, ct_slices, contours, structure_name, patien
             
 
 
-def check_contour_slices(target_contours, slice_shape, patient_id):
-    slice_files = os.listdir(f"./out/patient{patient_id}/slices")
+def check_contour_slices(target_contours, slice_shape, patient_id, series_num):
+    out_dir = Path(f"./out/patient{patient_id}/series{series_num}")
+    slice_files = os.listdir(out_dir/"slices")
     indxs = [f.replace('slice', '').replace('.npy', '') for f in slice_files]
     for contour in target_contours:
-        contour_dir = Path(f"./out/patient{patient_id}/{contour}")
+        contour_dir = out_dir/contour
         contour_dir.mkdir(exist_ok=True,parents=True)
         for idx in indxs:
             slice_file = contour_dir/f"{idx}.npy"
             if not slice_file.is_file():
-                np.save(slice_file,np.zeros(shape=slice_shape))
+                np.save(slice_file,np.zeros(shape=slice_shape, dtype=np.bool))
 
 
+def process_series(rs, series_uid, series_dict, patient_id, series_num):
+    # Load CT
+    ct_image, ct_slices, spacing = load_ct_from_series(series_dict[series_uid])
+
+    
+    with open('target_contours.txt', 'r') as f:
+        data = f.readline().strip()
+        target_contours = data.split(sep=',')
+
+    for structure_name in target_contours:
+        contours = get_structure_contours(rs, structure_name)
+
+        generate_patient_files(ct_image, ct_slices, contours, structure_name, patient_id, series_num)
+    
+    check_contour_slices(target_contours, ct_image[0].shape, patient_id, series_num)
 
 
 def process_patient(patient_id):
@@ -216,23 +232,9 @@ def process_patient(patient_id):
     # print(len(pairs_ct_rs))
     pairs_ct_rs = filter_series(pairs_ct_rs, 'target_contours.txt')
 
-    rs = pairs_ct_rs[0][1]
-    series_uid = pairs_ct_rs[0][0]
-
-    # Load CT
-    ct_image, ct_slices, spacing = load_ct_from_series(series_dict[series_uid])
-
-    # Choose a structure (e.g., "Bladder" or the name you printed above)
-    with open('target_contours.txt', 'r') as f:
-        data = f.readline().strip()
-        target_contours = data.split(sep=',')
-
-    for structure_name in target_contours:
-        contours = get_structure_contours(rs, structure_name)
-
-        generate_patient_files(ct_image, ct_slices, contours, structure_name, patient_id)
-    
-    check_contour_slices(target_contours, ct_image[0].shape, patient_id)
+    for i in range(4,8):
+        series_uid, rs = pairs_ct_rs[i]
+        process_series(rs, series_uid, series_dict, patient_id, i)
 
 
 if __name__ == "__main__":
