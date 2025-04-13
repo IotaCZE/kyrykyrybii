@@ -11,7 +11,6 @@ A data processing and visualization toolkit for medical imaging datasets, with a
 ## 📁 Project Structure
 
 - **`Rackaton_Data/SAMPLE_00X/`**: Directories containing data for individual subjects, where `00X` denotes the subject ID.
-- **`playbook.ipynb`**: Main notebook demonstrating data processing workflows.
 - **`ct_series.py`**: Script for handling CT series data.
 - **`data_parsing.py`**, **`data_parsing_merged.py`**: Scripts for parsing and merging dataset information.
 - **`measure.py`**: Contains functions for measuring and analyzing data metrics.

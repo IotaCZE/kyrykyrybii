@@ -43,8 +43,8 @@ class RadioProtectDataset(Dataset):
     
 
 #spinal cord path
-spin_cord_path = 'out/patient1/SpinalCord'
-slices_path = 'out/patient1/slices'
+spin_cord_path = '/Users/oliverklimt/projects/rakathon2025/kyrykyrybii/out/patient1/series4/SpinalCord'
+slices_path = '/Users/oliverklimt/projects/rakathon2025/kyrykyrybii/out/patient1/series4/slices'
 
 dataset = RadioProtectDataset(slices_path,spin_cord_path)
 
