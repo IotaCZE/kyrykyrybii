@@ -16,6 +16,7 @@ A data processing and visualization toolkit for medical imaging datasets, with a
 - **`measure.py`**: Contains functions for measuring and analyzing data metrics.
 - **`show_dcm.py`**: Utility for displaying DICOM images.
 - **`visualize_mask.py`**: Tool for visualizing segmentation masks.
+- **`segmentation*.py`**: J2K2Net models including training scripts.
 - **`requirements.txt`**: List of Python dependencies.
 - **`target_contours.txt`**: Text file listing target contours for analysis.
 
@@ -40,6 +41,12 @@ A data processing and visualization toolkit for medical imaging datasets, with a
     ```bash
     pip install -r requirements.txt
     ```
+1. **Parse patient data**
+   Parse data for each of the patients.
+   ```
+   python3 data_parsing.py
+   ```
+   Then separate the parsed data into train, dev and test folders for training.
 1. **Explore & train models**
    ```
    python3 segmentationeffnetb0.py
