@@ -40,4 +40,7 @@ A data processing and visualization toolkit for medical imaging datasets, with a
     ```bash
     pip install -r requirements.txt
     ```
-1. **Explore**
+1. **Explore & train models**
+   ```
+   python3 segmentationeffnetb0.py
+   ```
